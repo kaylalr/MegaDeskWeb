@@ -1,15 +1,13 @@
 ﻿@{
-    //var db = WebMatrix.Data.Database.Open("MyScriptureJournal");
-    //var selectedData = db.Query("SELECT * FROM Scriptures");
-    //var grid = new WebGrid(source: selectedData, rowsPerPage: 5);
+    Layout = "~/_Layout.cshtml";
 
     var db = WebMatrix.Data.Database.Open("MegaDeskWeb");
-    var selectCommand = "SELECT * FROM Desks";
+    var selectCommand = "SELECT CustomerName, Date, QuoteAmount, DeskQuoteId FROM DeskQuote;";
     var searchTerm = "";
 
     if (!Request.QueryString["searchCustomerName"].IsEmpty())
     {
-        selectCommand = "SELECT * FROM Desks WHERE Book = @0";
+        selectCommand = "SELECT * FROM DeskQuote WHERE CustomerName = @0";
         searchTerm = Request.QueryString["searchCustomerName"];
     }
 
@@ -86,19 +84,17 @@
             headerStyle: "head",
             alternatingRowStyle: "alt",
             columns: grid.Columns(
-                grid.Column(format: @<a href="~/EditDesk?id=@item.ID">Edit</a>),
-                        @*grid.Column(format:@<strong>@item.Title</strong>),
-                            grid.Column("Genre"),
-                            grid.Column("Year")*@
+                grid.Column(format: @<a href="~/EditDesk?id=@item.DeskQuoteId">Edit</a>),
+                        @*grid.Column(format:@<strong>@item.Title</strong>),*@
                         grid.Column("CustomerName"),
-                        grid.Column("Width"),
-                        grid.Column("Depth"),
-                        grid.Column("NumOfDrawers"),
-                        grid.Column("Material"),
-                        grid.Column("RushOrder"),
                         grid.Column("Date"),
                         grid.Column("QuoteAmount"),
-                        grid.Column(format: @<a href="~/DeleteScripture?id=@item.ID">Delete</a>)
+                        //grid.Column("NumOfDrawers"),
+                        //grid.Column("Material"),
+                        //grid.Column("RushOrder"),
+                        //grid.Column("Date"),
+                        //grid.Column("QuoteAmount"),
+                        grid.Column(format: @<a href="~/DeleteDesk?id=@item.DeskQuoteId">Delete</a>)
                                     )
                            )
     </div>
