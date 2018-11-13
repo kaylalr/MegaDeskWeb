@@ -1,0 +1,68 @@
+@{
+    var customerName = "";
+    var width = "";
+    var depth = "";
+    var numOfDrawers = "";
+    var surfaceMaterial = "";
+    var rushOrder = "";
+    var date = System.DateTime.Now.ToString();
+
+
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Delete a Desk</title>
+</head>
+<body>
+    <h1>Delete a Desk </h1>
+    <p><a href="~/Desks">Return to desk</a></p>
+
+    <form method="post">
+        <fieldset>
+            <legend>Desk Information</legend>
+
+            <p>
+                <label for="customerName">Customer Name:</label>
+                <input id="customerName" type="text" name="customerName" />
+            </p>
+
+            <p>
+                <label for="width">Width:</label>
+                <input id="width" type="text" name="width" />
+            </p>
+
+            <p>
+                <label for="depth">Depth:</label>
+                <input id="depth" type="text" name="depth" />
+            </p>
+
+            <p>
+                <label for="numOfDrawers">Number of Drawers:</label>
+                <input id="numOfDrawersh" type="text" name="numOfDrawers" />
+            </p>
+
+            <p>
+                <label for="surfaceMaterial">Surface Material:</label>
+                <input id="surfaceMateria" type="text" name="surfaceMateria" />
+            </p>
+
+            <p>
+                <label for="surfaceMaterial">Surface Material:</label>
+                <input id="surfaceMateria" type="text" name="surfaceMateria" />
+            </p>
+
+            <p><input type="submit" name="deleteButton" value="Delete Desk" /></p>
+        </fieldset>
+    </form>
+
+
+
+
+
+</body>
+</html>
