@@ -1,0 +1,107 @@
+﻿@{
+
+    Validation.RequireField("customerName", "You must enter a name");
+    Validation.RequireField("width", "Width is required");
+    Validation.RequireField("depth", "Depth is required");
+    Validation.RequireField("numOfDrawers", "You haven't entered the number of drawers");
+    Validation.RequireField("material", "You haven't entered a material");
+    Validation.RequireField("rushOrder", "You haven't entered a rush order time");
+    //Validation.RequireField("quoteAmount", "You haven't entered a note");
+
+    var customerName = "";
+    var width = "";
+    var depth = "";
+    var numOfDrawers = "";
+    var material = "";
+    var rushOrder = "";
+    var date = System.DateTime.Now.ToString();
+
+    // need to make a function to get quoteAmount, but don't do it here
+    var quoteAmount = 0;
+
+    if (IsPost && Validation.IsValid())
+    {
+        customerName = Request.Form["customerName"];
+        width = Request.Form["width"];
+        depth = Request.Form["depth"];
+        numOfDrawers = Request.Form["numOfDrawers"];
+        material = Request.Form["material"];
+        rushOrder = Request.Form["rushOrder"];
+
+        var db = WebMatrix.Data.Database.Open("MegaDeskWeb");
+        var insertCommand = "INSERT INTO Desks (CustomerName, Width, Depth, NumOfDrawers, Material, RushOrder, Date, QuoteAmount) Values(@0, @1, @2, @3, @4, @5, @6, @7)";
+        db.Execute(insertCommand, customerName, width, depth, numOfDrawers, material, rushOrder, date, quoteAmount);
+        Response.Redirect("~/Desks");
+    }
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Add Scripture</title>
+    <style type="text/css">
+        .field-validation-error {
+            font-weight: bold;
+            color: red;
+            background-color: yellow;
+        }
+
+        .validation-summary-errors {
+            border: 2px dashed red;
+            color: red;
+            background-color: yellow;
+            font-weight: bold;
+            margin: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Add a Desk</h1>
+    @Html.ValidationSummary()
+    <p><a href="~/Desks">Return to desk listing</a></p>
+    <form method="post">
+        <fieldset>
+            <legend>Desk Information</legend>
+            <p>
+                <label for="customerName">Customer Name:</label>
+                <input id="customerName" type="text" name="customerName" value="@Request.Form["customerName"]" />
+                @Html.ValidationMessage("customerName")
+            </p>
+
+            <p>
+                <label for="width">Width:(num)</label>
+                <input id="width" type="text" name="width" value="@Request.Form["width"]" />
+                @Html.ValidationMessage("width")
+            </p>
+
+            <p>
+                <label for="depth">Depth:(num)</label>
+                <input id="depth" type="text" name="depth" value="@Request.Form["depth"]" />
+                @Html.ValidationMessage("depth")
+            </p>
+
+            <p>
+                <label for="numOfDrawers">Number Of Drawers:(num)</label>
+                <input id="numOfDrawers" type="text" name="numofDrawers" value="@Request.Form["numOfDrawers"]" />
+                @Html.ValidationMessage("nomOfDrawers")
+            </p>
+
+            <p>
+                <label for="material">Material:</label>
+                <input id="material" type="text" name="material" value="@Request.Form["material"]" />
+                @Html.ValidationMessage("material")
+            </p>
+
+            <p>
+                <label for="rushOrder">Rush Order:(num)</label>
+                <input id="rushOrder" type="text" name="rushOrder" value="@Request.Form["rushOrder"]" />
+                @Html.ValidationMessage("rushOrder")
+            </p>
+
+            <p><input type="submit" name="buttonSubmit" value="Add Desk" /></p>
+        </fieldset>
+    </form>
+</body>
+</html>
