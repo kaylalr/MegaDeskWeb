@@ -4,7 +4,7 @@
     Validation.RequireField("width", "Width is required");
     Validation.RequireField("depth", "Depth is required");
     Validation.RequireField("numOfDrawers", "You haven't entered the number of drawers");
-    Validation.RequireField("material", "You haven't entered a material");
+    Validation.RequireField("surfaceMaterial", "You haven't entered a material");
     Validation.RequireField("rushOrder", "You haven't entered a rush order time");
     //Validation.RequireField("quoteAmount", "You haven't entered a note");
 
@@ -12,7 +12,7 @@
     var width = "";
     var depth = "";
     var numOfDrawers = "";
-    var material = "";
+    var surfaceMaterial = "";
     var rushOrder = "";
     var date = System.DateTime.Now.ToString();
 
@@ -25,12 +25,12 @@
         width = Request.Form["width"];
         depth = Request.Form["depth"];
         numOfDrawers = Request.Form["numOfDrawers"];
-        material = Request.Form["material"];
+        surfaceMaterial = Request.Form["surfaceMaterial"];
         rushOrder = Request.Form["rushOrder"];
 
         var db = WebMatrix.Data.Database.Open("MegaDeskWeb");
-        var insertCommand = "INSERT INTO Desks (CustomerName, Width, Depth, NumOfDrawers, Material, RushOrder, Date, QuoteAmount) Values(@0, @1, @2, @3, @4, @5, @6, @7)";
-        db.Execute(insertCommand, customerName, width, depth, numOfDrawers, material, rushOrder, date, quoteAmount);
+        var insertCommand = "INSERT INTO Desk (CustomerName, Width, Depth, NumOfDrawers, SurfaceMaterial, RushOrder, Date, QuoteAmount) Values(@0, @1, @2, @3, @4, @5, @6, @7)";
+        db.Execute(insertCommand, customerName, width, depth, numOfDrawers, surfaceMaterial, rushOrder, date, quoteAmount);
         Response.Redirect("~/Desks");
     }
 }
@@ -89,9 +89,9 @@
             </p>
 
             <p>
-                <label for="material">Material:</label>
-                <input id="material" type="text" name="material" value="@Request.Form["material"]" />
-                @Html.ValidationMessage("material")
+                <label for="surfaceMaterial">Surface Material:</label>
+                <input id="surfaceMaterial" type="text" name="surfaceMaterial" value="@Request.Form["surfaceMaterial"]" />
+                @Html.ValidationMessage("surfaceMaterial")
             </p>
 
             <p>

@@ -3,7 +3,7 @@
     var width = "";
     var depth = "";
     var numOfDrawers = "";
-    var material = "";
+    var surfaceMaterial = "";
     var rushOrder = "";
     var date = System.DateTime.Now.ToString();
     var quoteAmount = "";
@@ -15,13 +15,13 @@
         {
             deskId = Request.QueryString["ID"];
             var db = WebMatrix.Data.Database.Open("MegaDeskWeb");
-            var dbCommand = "SELECT * FROM Desks WHERE ID = @0";
+            var dbCommand = "SELECT * FROM Desk WHERE ID = @0";
             var row = db.QuerySingle(dbCommand, deskId);
             customerName = row.CustomerName;
             width = row.Width.ToString();
             depth = row.Depth.ToString();
             numOfDrawers = row.NumOfDrawers.ToString();
-            material = row.Material;
+            surfaceMaterial = row.SurfaceMaterial;
             rushOrder = row.RushOrder.ToString();
             date = row.Date.ToString();
             quoteAmount = row.QuoteAmount.ToString();
@@ -46,7 +46,7 @@
         width = Request.Form["width"];
         depth = Request.Form["depth"];
         numOfDrawers = Request.Form["numOfDrawers"];
-        material = Request.Form["material"];
+        surfaceMaterial = Request.Form["surfaceMaterial"];
         rushOrder = Request.Form["rushOrder"];
 
         // take out or get acutal amount
@@ -55,8 +55,8 @@
         if (Validation.IsValid())
         {
             var db = WebMatrix.Data.Database.Open("MegaDeskWeb");
-            var updateCommand = "UPDATE Desks SET CustomerName=@0, Width=@1, Depth=@2, NumOfDrawers=@3, Material=@4, RushOrder=@5, Date=@6, QuoteAmount=@7 WHERE Id=@8";
-            db.Execute(updateCommand, customerName, width, depth, numOfDrawers, material, rushOrder, date, quoteAmount, deskId);
+            var updateCommand = "UPDATE Desk SET CustomerName=@0, Width=@1, Depth=@2, NumOfDrawers=@3, SurfaceMaterial=@4, RushOrder=@5, Date=@6, QuoteAmount=@7 WHERE Id=@8";
+            db.Execute(updateCommand, customerName, width, depth, numOfDrawers, surfaceMaterial, rushOrder, date, quoteAmount, deskId);
             Response.Redirect("~/Desks");
         }
     }
@@ -105,8 +105,8 @@
             </p>
 
             <p>
-                <label for="material">Material:</label>
-                <input id="material" type="text" name="material" value="@material" />
+                <label for="surfaceMaterial">Surface Material:</label>
+                <input id="surfaceMaterial" type="text" name="surfaceMaterial" value="@surfaceMaterial" />
             </p>
 
             <p>
