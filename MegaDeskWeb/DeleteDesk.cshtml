@@ -1,0 +1,110 @@
+@{
+    var customerName = "";
+    var width = "";
+    var depth = "";
+    var numOfDrawers = "";
+    var surfaceMaterial = "";
+    var rushOrder = "";
+    var date = "";
+    var quoteAmount = "";
+    var deskId = "";
+
+if (!IsPost)
+    {
+        if (!Request.QueryString["ID"].IsEmpty() && Request.QueryString["ID"].IsInt())
+        {
+            deskId = Request.QueryString["ID"];
+            var db = WebMatrix.Data.Database.Open("MegaDeskWeb");
+            var dbCommand = "SELECT * FROM Desk WHERE ID = @0";
+            var row = db.QuerySingle(dbCommand, deskId);
+            if (row != null)
+            {
+                customerName = row.CustomerName;
+                width = row.Width.ToString();
+                depth = row.Depth.ToString();
+                numOfDrawers = row.NumOfDrawers.ToString();
+                surfaceMaterial = row.SurfaceMaterial;
+                rushOrder = row.RushOrder.ToString();
+                date = row.Date.ToString();
+                quoteAmount = row.QuoteAmount();
+
+            }
+            else
+            {
+                Validation.AddFormError("No desk was found for that ID.");
+            }
+        }
+        else
+        {
+            Validation.AddFormError("No desk was found for that ID.");
+        }
+    }
+    if (IsPost && !Request["deleteButton"].IsEmpty())
+    {
+        deskId = Request.Form["deskId"];
+        var db = WebMatrix.Data.Database.Open("MegaDeskWeb");
+        var deleteCommand = "DELETE FROM Desk WHERE ID = @0";
+        db.Execute(deleteCommand, deskId);
+        Response.Redirect("~/ViewAll");
+    }
+
+}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Delete a Desk</title>
+</head>
+<body>
+    <h1>Delete a Desk </h1>
+    <form method="post">
+        <fieldset>
+            <legend>Desk Information</legend>
+
+            <p>
+                <label for="customerName">Customer Name:</label>
+                <input id="customerName" type="text" name="customerName" value="@customerName"/>
+            </p>
+
+            <p>
+                <label for="width">Width:</label>
+                <input id="width" type="text" name="width" value="@width" />
+            </p>
+
+            <p>
+                <label for="depth">Depth:</label>
+                <input id="depth" type="text" name="depth" value="@depth" />
+            </p>
+
+            <p>
+                <label for="numOfDrawers">Number of Drawers:</label>
+                <input id="numOfDrawers" type="text" name="numOfDrawers" value="@numOfDrawers" />
+            </p>
+
+            <p>
+                <label for="surfaceMaterial">Surface Material:</label>
+                <input id="surfaceMateria" type="text" name="surfaceMateria" value="@surfaceMaterial" />
+            </p>
+
+            <p>
+                <label for="rushOrder">Rush Order:</label>
+                <input id="rushOrder" type="text" name="rushOrder" value="@rushOrder" />
+            </p>
+
+            <input type="hidden" name="deskId" value="@deskId" />
+            <input type="hidden" name="deskQuoteId" value="@deskQuoteId" />
+
+            <p><input type="submit" name="deleteButton" value="Delete Desk" /></p>
+        </fieldset>
+        <p><a href="~/Desks">Return to desk</a></p>
+    </form>
+
+
+
+
+
+</body>
+</html>
