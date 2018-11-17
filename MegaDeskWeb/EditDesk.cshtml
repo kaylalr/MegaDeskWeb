@@ -1,125 +1,128 @@
-﻿@{
+﻿@using MegaDesk;
+@{
+    Page.Title = "Edit Desk";
+    Layout = "~/_Layout.cshtml";
+
+    var db = WebMatrix.Data.Database.Open("MegaDeskWeb");
+
+    var shippingData = db.Query("SELECT * FROM Shipping");
+    var surfaceData = db.Query("SELECT * FROM SurfaceMaterial");
+
+    decimal quoteAmount = 0;
+
+    Validation.RequireField("customerName", "You must enter a name");
+    Validation.RequireField("width", "Width is required");
+    Validation.RequireField("depth", "Depth is required");
+    Validation.RequireField("numOfDrawers", "You haven't entered the number of drawers");
+    Validation.RequireField("surfaceMaterial", "You haven't entered a material");
+    Validation.RequireField("rushOrder", "You haven't entered a rush order time");
+
     var customerName = "";
-    var width = "";
-    var depth = "";
-    var numOfDrawers = "";
-    var surfaceMaterial = "";
-    var rushOrder = "";
-    var date = System.DateTime.Now.ToString();
-    var quoteAmount = "";
-    var deskId = "";
+    var width = 0;
+    var depth = 0;
+    var numOfDrawers = 0;
+    var surfaceMaterial = 0;
+    var rushOrder = 0;
+    var surfaceMaterialName = "";
+    var rushOrderName = "";
+    var date = System.DateTime.Now;
 
     if (!IsPost)
     {
-        if (!Request.QueryString["ID"].IsEmpty())
-        {
-            deskId = Request.QueryString["ID"];
-            var db = WebMatrix.Data.Database.Open("MegaDeskWeb");
-            var dbCommand = "SELECT * FROM Desk WHERE ID = @0";
-            var row = db.QuerySingle(dbCommand, deskId);
-            customerName = row.CustomerName;
-            width = row.Width.ToString();
-            depth = row.Depth.ToString();
-            numOfDrawers = row.NumOfDrawers.ToString();
-            surfaceMaterial = row.SurfaceMaterial;
-            rushOrder = row.RushOrder.ToString();
-            date = row.Date.ToString();
-            quoteAmount = row.QuoteAmount.ToString();
-        }
-        else
-        {
-            Validation.AddFormError("No desk was selected.");
-        }
+        var deskQuoteData = db.QuerySingle("SELECT * FROM DeskQuote WHERE DeskQuoteId = @0", Request.QueryString["id"]);
+        var deskData = db.QuerySingle("SELECT * FROM DESK WHERE DeskId = @0", deskQuoteData["DeskId"]);
+
+        customerName = deskQuoteData.CustomerName;
+        width = deskData.width;
+        depth = deskData.Depth;
+        numOfDrawers = deskData.NumOfDrawers;
+        surfaceMaterial = deskData.SurfaceMaterialId;
+        rushOrder = deskQuoteData.ShippingId;
+        surfaceMaterialName = db.QuerySingle("SELECT SurfaceMaterial FROM SurfaceMaterial WHERE SurfaceMaterialId = @0", surfaceMaterial).SurfaceMaterial;
+        rushOrderName = db.QuerySingle("SELECT NumOfDays FROM Shipping WHERE ShippingId = @0", rushOrder).NumOfDays;
+        date = deskQuoteData.Date;
     }
 
-    if (IsPost)
+    if (IsPost && Validation.IsValid())
     {
-        Validation.RequireField("customerName", "You must enter a name");
-        Validation.RequireField("width", "Width is required");
-        Validation.RequireField("depth", "Depth is required");
-        Validation.RequireField("numOfDrawers", "You haven't entered the number of drawers");
-        Validation.RequireField("material", "You haven't entered a material");
-        Validation.RequireField("rushOrder", "You haven't entered a rush order time");
-        //Validation.RequireField("quoteAmount", "You haven't entered a note");
-
         customerName = Request.Form["customerName"];
-        width = Request.Form["width"];
-        depth = Request.Form["depth"];
-        numOfDrawers = Request.Form["numOfDrawers"];
-        surfaceMaterial = Request.Form["surfaceMaterial"];
-        rushOrder = Request.Form["rushOrder"];
+        width = Convert.ToInt32(Request.Form["width"]);
+        depth = Convert.ToInt32(Request.Form["depth"]);
+        numOfDrawers = Convert.ToInt32(Request.Form["numOfDrawers"]);
+        surfaceMaterial = Convert.ToInt32(Request.Form["surfaceMaterial"]);
+        rushOrder = Convert.ToInt32(Request.Form["rushOrder"]);
 
-        // take out or get acutal amount
-        quoteAmount = width + depth;
+        Desk desk = new Desk(width, depth, numOfDrawers, surfaceMaterial);
+        DeskQuote deskQuote = new DeskQuote(desk, rushOrder, customerName, date);
 
-        if (Validation.IsValid())
-        {
-            var db = WebMatrix.Data.Database.Open("MegaDeskWeb");
-            var updateCommand = "UPDATE Desk SET CustomerName=@0, Width=@1, Depth=@2, NumOfDrawers=@3, SurfaceMaterial=@4, RushOrder=@5, Date=@6, QuoteAmount=@7 WHERE Id=@8";
-            db.Execute(updateCommand, customerName, width, depth, numOfDrawers, surfaceMaterial, rushOrder, date, quoteAmount, deskId);
-            Response.Redirect("~/Desks");
-        }
+        quoteAmount = deskQuote.Price;
+
+        var insertDeskCommand = "INSERT INTO Desk (Width, Depth, NumOfDrawers, SurfaceMaterialId) VALUES(@0, @1, @2, @3)";
+        db.Execute(insertDeskCommand, width, depth, numOfDrawers, surfaceMaterial);
+        var insertDeskQuoteCommand = "INSERT INTO DeskQuote (CustomerName, DeskId, ShippingId, Date, QuoteAmount) VALUES(@0, @1, @2, @3, @4)";
+        var deskId = db.GetLastInsertId();
+        db.Execute(insertDeskQuoteCommand, customerName, deskId, rushOrder, date, quoteAmount);
+        Response.Redirect("~/Desks");
     }
+
+
 }
+<h2>Edit Desk</h2>
+<p><a href="~/Desks">Return to desk listing</a></p>
+@Html.ValidationSummary()
+<form method="post">
+    <fieldset>
+        <legend>Desk Information</legend>
+        <p>
+            <label for="customerName">Customer Name:</label>
+            <input id="customerName" type="text" name="customerName" value="@customerName" />
+            @Html.ValidationMessage("customerName")
+        </p>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>Edit Desk</title>
-    <style>
-        .validation-summary-errors {
-            border: 2px dashed red;
-            color: red;
-            font-weight: bold;
-            margin: 12px;
-        }
-    </style>
-</head>
-<body>
-    <h1>Edit Desk</h1>
-    @Html.ValidationSummary()
-    <p><a href="~/Desks">Return to desk listing</a></p>
-    <form method="post">
-        <fieldset>
-            <legend>Desk Information</legend>
+        <p>
+            <label for="width">Width:(num)</label>
+            <input id="width" type="text" name="width" value="@width" />
+            @Html.ValidationMessage("width")
+        </p>
 
-            <p>
-                <label for="customerName">Customer Name:</label>
-                <input id="customerName" type="text" name="customerName" value="@customerName" />
-            </p>
+        <p>
+            <label for="depth">Depth:(num)</label>
+            <input id="depth" type="text" name="depth" value="@depth" />
+            @Html.ValidationMessage("depth")
+        </p>
 
-            <p>
-                <label for="width">Width:</label>
-                <input id="width" type="text" name="width" value="@width" />
-            </p>
+        <p>
+            <label for="numOfDrawers">Number Of Drawers:(num)</label>
+            <input id="numOfDrawers" type="text" name="numOfDrawers" value="@numOfDrawers" />
+            @Html.ValidationMessage("numOfDrawers")
+        </p>
 
-            <p>
-                <label for="depth">Depth:</label>
-                <input id="depth" type="text" name="depth" value="@depth" />
-            </p>
+        <p>
+            <label for="surfaceMaterial">Surface Material:</label>
+            <select id="surfaceMaterial" type="text" name="surfaceMaterial" >
+                <option selected disabled>Select a Material</option>
+                @foreach (var row in surfaceData)
+                {
+                    <option value="@row.SurfaceMaterialId">@row.SurfaceMaterial</option>
+                }
+            </select>
+            @Html.ValidationMessage("surfaceMaterial")
+        </p>
 
-            <p>
-                <label for="numOfDrawers">Number of Drawers:</label>
-                <input id="numOfdrawers" type="text" name="numOfDrawers" value="@numOfDrawers" />
-            </p>
+        <p>
+            <label for="rushOrder">Rush Order:(num)</label>
+            <select id="rushOrder" name="rushOrder">
+                <option selected disabled>Select Shipping</option>
+                @foreach (var row in shippingData)
+                {
+                    <option value="@row.ShippingId">@row.NumOfDays</option>
+                }
+            </select>
+            @Html.ValidationMessage("rushOrder")
+        </p>
 
-            <p>
-                <label for="surfaceMaterial">Surface Material:</label>
-                <input id="surfaceMaterial" type="text" name="surfaceMaterial" value="@surfaceMaterial" />
-            </p>
+        <p><input type="submit" name="buttonSubmit" value="Add Desk" /></p>
 
-            <p>
-                <label for="rushOrder">Rush Order:</label>
-                <input id="rushOrder" type="text" name="rushOrder" value="@rushOrder" />
-            </p>
-
-            <p>@deskId</p>
-
-            <input type="hidden" name="deskId" value="@deskId" />
-
-            <p><input type="submit" name="buttonSubmit" value="Submit Changes" /></p>
-        </fieldset>
-    </form>
-</body>
-</html>
+        <p><label>Quote: $</label>@quoteAmount</p>
+    </fieldset>
+</form>

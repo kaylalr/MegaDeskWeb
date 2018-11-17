@@ -15,24 +15,14 @@ namespace MegaDesk
         const decimal PINE_COST = 50.00M;
         const decimal ROSEWOOD_COST = 300.00M;
         const decimal VENEER_COST = 125.00M;
-
-        // enums
-        public enum Delivery
-        {
-            Rush3Days,
-            Rush5Days,
-            Rush7Days,
-            Normal14Days
-        }
-
+     
         public Desk Desk { get; set; }
-        public string Shipping { get; set; }
+        public int Shipping { get; set; }
         public string Customer { get; set; }
         public DateTime Date { get; set; }
         public decimal Price { get; set; }
-        public int[,] rushOrder = new int[3, 3];
 
-        public DeskQuote(Desk desk, string time, string name, DateTime date)
+        public DeskQuote(Desk desk, int time, string name, DateTime date)
         {
             Desk = desk;
             Shipping = time;
@@ -41,7 +31,7 @@ namespace MegaDesk
             Price = GetQuote(desk, time);
         }
 
-        public decimal GetQuote(Desk desk, string time)
+        public decimal GetQuote(Desk desk, int time)
         {
             decimal totalQuote = BASE_DESK_PRICE;
             decimal surfaceArea = desk.Width * desk.Depth;
@@ -58,13 +48,13 @@ namespace MegaDesk
 
             var db = WebMatrix.Data.Database.Open("MegaDeskWeb");
 
-            var surfaceQuery = db.Query("SELECT Cost FROM SurfaceMaterial WHERE SurfaceMaterial = @0", desk.Material);
+            var surfaceQuery = db.Query("SELECT Cost FROM SurfaceMaterial WHERE SurfaceMaterialId = @0", desk.Material);
             foreach (var row in surfaceQuery)
             {
-                totalQuote += row;
+                totalQuote += row.Cost;
             }
 
-            var shippingQuery = db.Query("SELECT * FROM Shipping WHERE NumOfDays = @0");
+            var shippingQuery = db.Query("SELECT * FROM Shipping WHERE ShippingId = @0", time);
             foreach (var row in shippingQuery)
             {
                 if (surfaceArea < 1000)
@@ -79,8 +69,7 @@ namespace MegaDesk
                 {
                     totalQuote += row.Cost1000to2000;
                 }
-            }
-            
+            }            
             return totalQuote;
         }
     }
