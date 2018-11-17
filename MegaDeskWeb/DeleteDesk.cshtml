@@ -1,4 +1,4 @@
-@{
+﻿@{
     var customerName = "";
     var width = "";
     var depth = "";
@@ -7,45 +7,69 @@
     var rushOrder = "";
     var date = "";
     var quoteAmount = "";
-    var deskId = "";
+    int deskId = 0;
+    int deskQuoteId = 0;
 
-if (!IsPost)
+    if (!IsPost)
     {
-        if (!Request.QueryString["ID"].IsEmpty() && Request.QueryString["ID"].IsInt())
+        if (!Request.QueryString["Id"].IsEmpty())// && Request.QueryString["Id"].IsInt())
         {
-            deskId = Request.QueryString["ID"];
+            //deskId = Int32.Parse(Request.QueryString["DeskId"]);
+            deskQuoteId = Convert.ToInt32(Request.QueryString["id"]);
             var db = WebMatrix.Data.Database.Open("MegaDeskWeb");
-            var dbCommand = "SELECT * FROM Desk WHERE ID = @0";
-            var row = db.QuerySingle(dbCommand, deskId);
+            //var dbCommand = "SELECT * FROM Desk WHERE DeskId = @0";
+            var dbCommand = @"SELECT 
+
+    dq.DeskQuoteId, dq.CustomerName, dq.Date, dq.QuoteAmount,
+	d.DeskId, d.Width, d.Depth, d.NumOfDrawers,
+	s.NumOfDays, 
+	sm.SurfaceMaterial FROM DeskQuote dq
+LEFT JOIN Desk d ON
+
+    dq.DeskId = d.DeskId
+LEFT JOIN Shipping s ON
+
+    dq.ShippingId = s.ShippingId
+LEFT JOIN SurfaceMaterial sm ON
+
+    d.SurfaceMaterialId = sm.SurfaceMaterialId WHERE DeskQuoteId = @0";
+            var row = db.QuerySingle(dbCommand, deskQuoteId);
+            //var row2 = db.QuerySingle(dbCommand2, deskQuoteId);
             if (row != null)
             {
+                //deskQuoteId = row.DeskQuoteId;
+                deskId = row.DeskId;
                 customerName = row.CustomerName;
                 width = row.Width.ToString();
                 depth = row.Depth.ToString();
                 numOfDrawers = row.NumOfDrawers.ToString();
                 surfaceMaterial = row.SurfaceMaterial;
-                rushOrder = row.RushOrder.ToString();
+                rushOrder = row.NumOfDays.ToString();
                 date = row.Date.ToString();
-                quoteAmount = row.QuoteAmount();
+                quoteAmount = row.QuoteAmount.ToString();
 
             }
             else
             {
-                Validation.AddFormError("No desk was found for that ID.");
+                Validation.AddFormError("No desk was found for that Id.");
             }
         }
         else
         {
-            Validation.AddFormError("No desk was found for that ID.");
+            Validation.AddFormError("No desk was found for that Id.");
         }
     }
     if (IsPost && !Request["deleteButton"].IsEmpty())
     {
-        deskId = Request.Form["deskId"];
+        deskId = Convert.ToInt32(Request.Form["deskId"]);
+        deskQuoteId = Convert.ToInt32(Request.Form["deskQuoteId"]);
         var db = WebMatrix.Data.Database.Open("MegaDeskWeb");
-        var deleteCommand = "DELETE FROM Desk WHERE ID = @0";
+        var deleteCommand = "DELETE FROM Desk WHERE DeskId = @0";
+        var deleteCommand2 = "DELETE FROM DeskQuote WHERE DeskQuoteId = @0";
+
+        db.Execute(deleteCommand2, deskQuoteId);
         db.Execute(deleteCommand, deskId);
-        Response.Redirect("~/ViewAll");
+        Response.Redirect("~/Desks");
     }
 
 }
@@ -57,49 +81,59 @@ if (!IsPost)
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <title>Delete a Desk</title>
+    <link href="https://fonts.googleapis.com/css?family=News+Cycle" rel="stylesheet">
+    <style type="text/css">
+        p, legend {
+            font-family: 'News Cycle', sans-serif;
+        }
+
+       legend, #deleteButton{
+            color: blue
+        }
+    </style>
 </head>
 <body>
     <h1>Delete a Desk </h1>
     <form method="post">
         <fieldset>
-            <legend>Desk Information</legend>
+            <legend>Desk Information:</legend>
 
             <p>
                 <label for="customerName">Customer Name:</label>
-                <input id="customerName" type="text" name="customerName" value="@customerName"/>
+                <input id="customerName" type="text" name="customerName" value="@customerName" disabled />
             </p>
 
             <p>
                 <label for="width">Width:</label>
-                <input id="width" type="text" name="width" value="@width" />
+                <input id="width" type="text" name="width" value="@width" disabled />
             </p>
 
             <p>
                 <label for="depth">Depth:</label>
-                <input id="depth" type="text" name="depth" value="@depth" />
+                <input id="depth" type="text" name="depth" value="@depth" disabled />
             </p>
 
             <p>
                 <label for="numOfDrawers">Number of Drawers:</label>
-                <input id="numOfDrawers" type="text" name="numOfDrawers" value="@numOfDrawers" />
+                <input id="numOfDrawers" type="text" name="numOfDrawers" value="@numOfDrawers" disabled />
             </p>
 
             <p>
                 <label for="surfaceMaterial">Surface Material:</label>
-                <input id="surfaceMateria" type="text" name="surfaceMateria" value="@surfaceMaterial" />
+                <input id="surfaceMateria" type="text" name="surfaceMateria" value="@surfaceMaterial" disabled />
             </p>
 
             <p>
                 <label for="rushOrder">Rush Order:</label>
-                <input id="rushOrder" type="text" name="rushOrder" value="@rushOrder" />
+                <input id="rushOrder" type="text" name="rushOrder" value="@rushOrder" disabled />
             </p>
 
             <input type="hidden" name="deskId" value="@deskId" />
             <input type="hidden" name="deskQuoteId" value="@deskQuoteId" />
 
-            <p><input type="submit" name="deleteButton" value="Delete Desk" /></p>
+            <p><input type="submit" name="deleteButton" id="deleteButton" value="Delete Desk" /></p>
         </fieldset>
-        <p><a href="~/Desks">Return to desk</a></p>
+        <p><a href="~/Desks">Return to Desk</a></p>
     </form>
 
 

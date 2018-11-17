@@ -106,6 +106,7 @@
     <Content Include="Desks.cshtml" />
     <Content Include="AddDesk.cshtml" />
     <Content Include="EditDesk.cshtml" />
+    <Content Include="DeleteDesk.cshtml" />
     <None Include="packages.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
