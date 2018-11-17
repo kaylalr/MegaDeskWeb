@@ -21,12 +21,11 @@
     decimal width;
     decimal depth;
     int numOfDrawers;
-    string surfaceMaterial = "";
-    string rushOrder = "";
+    int surfaceMaterial;
+    int rushOrder;
     DateTime date = System.DateTime.Now;
 
     // need to make a function to get quoteAmount, but don't do it here
-    //var quoteAmount = 0;
 
     if (IsPost && Validation.IsValid())
     {
@@ -34,17 +33,20 @@
         width = Convert.ToDecimal(Request.Form["width"]);
         depth = Convert.ToDecimal(Request.Form["depth"]);
         numOfDrawers = Convert.ToInt32(Request.Form["numOfDrawers"]);
-        surfaceMaterial = Request.Form["surfaceMaterial"];
-        rushOrder = Request.Form["rushOrder"];
+        surfaceMaterial = Convert.ToInt32(Request.Form["surfaceMaterial"]);
+        rushOrder = Convert.ToInt32(Request.Form["rushOrder"]);
 
         Desk desk = new Desk(width, depth, numOfDrawers, surfaceMaterial);
         DeskQuote deskQuote = new DeskQuote(desk, rushOrder, customerName, date);
 
         quoteAmount = deskQuote.Price;
 
-        //var insertCommand = "INSERT INTO Desk (CustomerName, Width, Depth, NumOfDrawers, SurfaceMaterial, RushOrder, Date, QuoteAmount) Values(@0, @1, @2, @3, @4, @5, @6, @7)";
-        //db.Execute(insertCommand, customerName, width, depth, numOfDrawers, surfaceMaterial, rushOrder, date, quoteAmount);
-        //Response.Redirect("~/Desks");
+        var insertDeskCommand = "INSERT INTO Desk (Width, Depth, NumOfDrawers, SurfaceMaterialId) VALUES(@0, @1, @2, @3)";
+        db.Execute(insertDeskCommand, width, depth, numOfDrawers, surfaceMaterial);
+        var insertDeskQuoteCommand = "INSERT INTO DeskQuote (CustomerName, DeskId, ShippingId, Date, QuoteAmount) VALUES(@0, @1, @2, @3, @4)";
+        var deskId = db.GetLastInsertId();
+        db.Execute(insertDeskQuoteCommand, customerName, deskId, rushOrder, date, quoteAmount);
+        Response.Redirect("~/Desks");
     }
 
 
@@ -81,11 +83,11 @@
 
         <p>
             <label for="surfaceMaterial">Surface Material:</label>
-            <select id="surfaceMaterial" type="text" name="surfaceMaterial" value="@Request.Form["surfaceMaterial"]">
+            <select id="surfaceMaterial" type="text" name="surfaceMaterial">
                 <option selected disabled>Select a Material</option>
                 @foreach (var row in surfaceData)
                 {
-                    <option value="@row.SurfaceMaterial">@row.SurfaceMaterial</option>
+                    <option selected="@(Request.Form["surfaceMaterial"] == @"row.SurfaceMaterialId")" value="@row.SurfaceMaterialId">@row.SurfaceMaterial</option>
                 }
             </select>
             @Html.ValidationMessage("surfaceMaterial")
@@ -93,11 +95,11 @@
 
         <p>
             <label for="rushOrder">Rush Order:(num)</label>
-            <select id="rushOrder" name="rushOrder" value="@Request.Form["rushOrder"]">
+            <select id="rushOrder" name="rushOrder">
                 <option selected disabled>Select Shipping</option>
                 @foreach (var row in shippingData)
                 {
-                    <option value="@row.NumOfDays">@row.NumOfDays</option>
+                    <option selected=@(Request.Form["rushOrder"] == @"row.ShippingId") value="@row.ShippingId">@row.NumOfDays</option>
                 }
             </select>
             @Html.ValidationMessage("rushOrder")
@@ -105,6 +107,6 @@
 
         <p><input type="submit" name="buttonSubmit" value="Add Desk" /></p>
 
-        <p>@quoteAmount</p>
+        <p><label>Quote: $</label>@quoteAmount</p>
     </fieldset>
 </form>

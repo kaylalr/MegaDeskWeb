@@ -8,21 +8,12 @@ namespace MegaDesk
 {
     public struct Desk
     {
-        public enum SurfaceMaterial
-        {
-            Laminate,
-            Oak,
-            Rosewood,
-            Veneer,
-            Pine
-        }
-
         public decimal Width { get; set; }
         public decimal Depth { get; set; }
         public int Drawers { get; set;  }
-        public string Material { get; set; }
+        public int Material { get; set; }
 
-        public Desk(decimal width, decimal depth, int drawers, string deskMaterial)
+        public Desk(decimal width, decimal depth, int drawers, int deskMaterial)
         {
             Width = width;
             Depth = depth;
